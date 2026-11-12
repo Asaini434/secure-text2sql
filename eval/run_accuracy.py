@@ -6,7 +6,11 @@ from text2sql.db import load_questions, run_sql
 from text2sql.pipeline import ask
 
 GOLD_CACHE = Path("eval/gold_cache.pkl")
-
+# Each experiment = a name + the settings it passes to ask()
+CONFIGS = {
+    "baseline": {"max_retries": 0},
+    "selfcorrect": {"max_retries": 2},
+}
 
 def gold_results(questions):
     """Run every gold query once and cache the rows; mark ones that time out as None."""
@@ -39,7 +43,7 @@ def main(run_name="baseline", limit=None):
                 continue  # already graded in an earlier run
             if gold[q["question_id"]] is None:
                 continue  # no gold answer to compare against
-            out = ask(q["db_id"], q["question"], q["evidence"])
+            out = ask(q["db_id"], q["question"], q["evidence"], **CONFIGS[run_name])
             ok = out["error"] is None and set(out["rows"]) == gold[q["question_id"]]
             f.write(json.dumps({"id": q["question_id"], "difficulty": q["difficulty"],
                                 "correct": ok, "sql": out["sql"], "error": out["error"]}) + "\n")

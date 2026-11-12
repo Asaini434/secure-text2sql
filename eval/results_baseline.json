@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1471,
+    "difficulty": "simple",
+    "correct": true,
+    "sql": "SELECT CAST(SUM(CASE WHEN Currency = 'EUR' THEN 1 ELSE 0 END) AS REAL) / SUM(CASE WHEN Currency = 'CZK' THEN 1 ELSE 0 END) AS Ratio\nFROM customers",
+    "error": null
+  },
+  {
+    "id": 1472,
+    "difficulty": "moderate",
+    "correct": false,
+    "sql": "SELECT T1.CustomerID, T1.Consumption\nFROM yearmonth AS T1\nINNER JOIN customers AS T2 ON T1.CustomerID = T2.CustomerID\nWHERE T1.Date LIKE '2012%' AND T2.Segment = 'LAM'\nORDER BY T1.Consumption ASC\nLIMIT 1",
+    "error": null
+  },
+  {
+    "id": 1473,
+    "difficulty": "moderate",
+    "correct": true,
+    "sql": "SELECT AVG(Consumption) / 12 AS AverageMonthlyConsumption\nFROM yearmonth\nJOIN customers ON yearmonth.CustomerID = customers.CustomerID\nWHERE customers.Segment = 'SME' AND yearmonth.Date BETWEEN '201301' AND '201312'",
+    "error": null
+  },
+  {
+    "id": 1476,
+    "difficulty": "challenging",
+    "correct": true,
+    "sql": "SELECT \n    (SELECT SUM(Consumption) \n     FROM yearmonth \n     INNER JOIN customers ON yearmonth.CustomerID = customers.CustomerID \n     WHERE customers.Currency = 'CZK' \n       AND yearmonth.Date BETWEEN '201201' AND '201212') -\n    (SELECT SUM(Consumption) \n     FROM yearmonth \n     INNER JOIN customers ON yearmonth.CustomerID = customers.CustomerID \n     WHERE customers.Currency = 'EUR' \n       AND yearmonth.Date BETWEEN '201201' AND '201212') AS DifferenceInConsumption",
+    "error": null
+  },
+  {
+    "id": 1479,
+    "difficulty": "moderate",
+    "correct": false,
+    "sql": "SELECT \n    SUBSTR(T1.Date, 1, 4) AS Year,\n    SUM(T1.Consumption) AS TotalConsumption\nFROM \n    yearmonth AS T1\nJOIN \n    customers AS T2 ON T1.CustomerID = T2.CustomerID\nWHERE \n    T2.Currency = 'CZK'\nGROUP BY \n    Year\nORDER BY \n    TotalConsumption DESC\nLIMIT 1",
+    "error": null
+  },
+  {
+    "id": 1480,
+    "difficulty": "moderate",
+    "correct": false,
+    "sql": "SELECT \n    SUBSTR(Date, 1, 4) AS Year,\n    SUBSTR(Date, 5, 2) AS Month,\n    MAX(Consumption) AS PeakConsumption\nFROM \n    yearmonth\nJOIN \n    customers ON yearmonth.CustomerID = customers.CustomerID\nWHERE \n    customers.Segment = 'SME' AND\n    Date BETWEEN '201301' AND '201312'\nGROUP BY \n    Year, Month\nORDER BY \n    PeakConsumption DESC\nLIMIT 1",
+    "error": null
+  },
+  {
+    "id": 1481,
+    "difficulty": "challenging",
+    "correct": false,
+    "sql": "WITH LAM AS (\n    SELECT AVG(Consumption) AS LAM_Annual_Average\n    FROM yearmonth\n    WHERE Date BETWEEN '201301' AND '201312'\n      AND CustomerID IN (\n          SELECT CustomerID\n          FROM customers\n          WHERE Currency = 'CZK'\n          ORDER BY Consumption ASC\n          LIMIT 1\n      )\n),\nSME AS (\n    SELECT AVG(Consumption) AS SME_Annual_Average\n    FROM yearmonth\n    WHERE Date BETWEEN '201301' AND '201312'\n      AND CustomerID IN (\n          SELECT CustomerID\n          FROM customers\n          WHERE Currency = 'CZK'\n          ORDER BY Consumption ASC\n          LIMIT 1\n      )\n),\nKAM AS (\n    SELECT AVG(Consumption) AS KAM_Annual_Average\n    FROM yearmonth\n    WHERE Date BETWEEN '201301' AND '201312'\n      AND CustomerID IN (\n          SELECT CustomerID\n          FROM customers\n          WHERE Currency = 'CZK'\n          ORDER BY Consumption ASC\n          LIMIT 1\n      )\n)\nSELECT \n    (SELECT LAM_Annual_Average FROM LAM) - (SELECT SME_Annual_Average FROM SME) AS LAM_SME_Difference,\n    (SELECT LAM_Annual_Average FROM LAM) - (SELECT KAM_Annual_Average FROM KAM) AS LAM_KAM_Difference,\n    (SELECT SME_Annual_Average FROM SME) - (SELECT KAM_Annual_Average FROM KAM) AS SME_KAM_Difference",
+    "error": "interrupted"
+  },
+  {
+    "id": 1482,
+    "difficulty": "challenging",
+    "correct": false,
+    "sql": "SELECT \n    Segment,\n    MAX((SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2013' THEN Consumption ELSE 0 END) - \n         SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2012' THEN Consumption ELSE 0 END)) / \n        SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2013' THEN Consumption ELSE 0 END)) * 100 AS MaxPercentageIncrease,\n    MIN((SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2013' THEN Consumption ELSE 0 END) - \n         SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2012' THEN Consumption ELSE 0 END)) / \n        SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2013' THEN Consumption ELSE 0 END)) * 100 AS MinPercentageDecrease\nFROM \n    yearmonth\nJOIN \n    customers ON yearmonth.CustomerID = customers.CustomerID\nWHERE \n    customers.Currency = 'EUR'\nGROUP BY \n    Segment",
+    "error": "misuse of aggregate function SUM()"
+  },
+  {
+    "id": 1483,
+    "difficulty": "simple",
+    "correct": true,
+    "sql": "SELECT SUM(Consumption) AS TotalConsumption\nFROM yearmonth\nWHERE CustomerID = 6\n  AND Date BETWEEN '201308' AND '201311'",
+    "error": null
+  },
+  {
+    "id": 1484,
+    "difficulty": "simple",
+    "correct": true,
+    "sql": "SELECT (SELECT COUNT(*) FROM gasstations WHERE Country = 'CZE' AND Segment = 'Discount') \n       - \n       (SELECT COUNT(*) FROM gasstations WHERE Country = 'SVK' AND Segment = 'Discount') AS Difference",
+    "error": null
+  },
+  {
+    "id": 1486,
+    "difficulty": "simple",
+    "correct": false,
+    "sql": "SELECT \n    (SELECT COUNT(*) FROM transactions_1k AS T1 INNER JOIN customers AS T2 ON T1.CustomerID = T2.CustomerID WHERE T2.Currency = 'CZK') -\n    (SELECT COUNT(*) FROM transactions_1k AS T1 INNER JOIN customers AS T2 ON T1.CustomerID = T2.CustomerID WHERE T2.Currency = 'EUR') AS Difference",
+    "error": null
+  },
+  {
+    "id": 1490,
+    "difficulty": "moderate",
+    "correct": true,
+    "sql": "SELECT \n    CAST(SUM(CASE WHEN T2.Consumption > 46.73 THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(T1.CustomerID) AS Percentage\nFROM \n    customers AS T1\nINNER JOIN \n    yearmonth AS T2 ON T1.CustomerID = T2.CustomerID\nWHERE \n    T1.Segment = 'LAM'",
+    "error": null
+  },
+  {
+    "id": 1493,
+    "difficulty": "simple",
+    "correct": true,
+    "sql": "SELECT CAST(SUM(CASE WHEN Consumption > 528.3 THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(CustomerID) AS Percentage\nFROM yearmonth\nWHERE Date LIKE '201202%'",
+    "error": null
+  },
+  {
+    "id": 1498,
+    "difficulty": "simple",
+    "correct": false,
+    "sql": "SELECT MAX(Consumption) AS HighestMonthlyConsumption\nFROM yearmonth\nWHERE Date LIKE '2012%'",
+    "error": null
+  },
+  {
+    "id": 1500,
+    "difficulty": "simple",
+    "correct": true,
+    "sql": "SELECT DISTINCT T3.Description\nFROM yearmonth AS T1\nINNER JOIN transactions_1k AS T2 ON T1.CustomerID = T2.CustomerID\nINNER JOIN products AS T3 ON T2.ProductID = T3.ProductID\nWHERE T1.Date LIKE '201309%'",
+    "error": null
+  },
+  {
+    "id": 1501,
+    "difficulty": "moderate",
+    "correct": false,
+    "sql": "SELECT DISTINCT T2.Country\nFROM transactions_1k AS T1\nINNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID\nWHERE T1.Date LIKE '201306%'",
+    "error": null
+  },
+  {
+    "id": 1505,
+    "difficulty": "simple",
+    "correct": false,
+    "sql": "SELECT COUNT(DISTINCT y.CustomerID)\nFROM yearmonth y\nJOIN customers c ON y.CustomerID = c.CustomerID\nWHERE c.Currency = 'EUR' AND y.Consumption > 1000",
+    "error": null
+  },
+  {
+    "id": 1506,
+    "difficulty": "moderate",
+    "correct": true,
+    "sql": "SELECT DISTINCT p.Description\nFROM transactions_1k t\nJOIN gasstations g ON t.GasStationID = g.GasStationID\nJOIN products p ON t.ProductID = p.ProductID\nWHERE g.Country = 'CZE'",
+    "error": null
+  },
+  {
+    "id": 1507,
+    "difficulty": "simple",
+    "correct": true,
+    "sql": "SELECT DISTINCT Time \nFROM transactions_1k \nWHERE GasStationID IN (SELECT GasStationID FROM gasstations WHERE ChainID = 11)",
+    "error": null
+  },
+  {
+    "id": 1509,
+    "difficulty": "moderate",
+    "correct": true,
+    "sql": "SELECT COUNT(*) \nFROM transactions_1k \nINNER JOIN gasstations ON transactions_1k.GasStationID = gasstations.GasStationID \nWHERE gasstations.Country = 'CZE' AND transactions_1k.Date > '2012-01-01'",
+    "error": null
+  }
+]

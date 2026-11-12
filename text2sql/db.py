@@ -1,5 +1,6 @@
 import json
 import sqlite3
+import time
 from contextlib import closing
 from pathlib import Path
 
@@ -28,7 +29,9 @@ def get_schema(db_id):
     return "\n\n".join(r[0] for r in rows if r[0])
 
 
-def run_sql(db_id, sql, read_only=False):
-    """Run a query and return all result rows."""
+def run_sql(db_id, sql, read_only=False, timeout=30):
+    """Run a query and return all result rows; stop it after `timeout` seconds."""
     with closing(connect(db_id, read_only)) as conn:
+        deadline = time.time() + timeout
+        conn.set_progress_handler(lambda: time.time() > deadline, 10_000)
         return conn.execute(sql).fetchall()

@@ -10,6 +10,8 @@ GOLD_CACHE = Path("eval/gold_cache.pkl")
 CONFIGS = {
     "baseline": {"max_retries": 0},
     "selfcorrect": {"max_retries": 2},
+    "richschema": {"max_retries": 2, "rich_schema": True},
+    "richhint": {"max_retries": 2, "rich_schema": True, "column_hints": True},
 }
 
 def gold_results(questions):

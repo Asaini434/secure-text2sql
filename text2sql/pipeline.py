@@ -1,5 +1,6 @@
 from text2sql.db import get_schema, describe_db, column_tables, run_sql
 from text2sql.llm import generate, clean_sql
+from text2sql.guards import validate_sql
 
 PROMPT = """You are an expert SQLite developer.
 
@@ -33,12 +34,16 @@ def error_hint(db_id, error):
         return f"Note: column `{col}` exists only in table(s): {', '.join(tables)}. Join to that table."
     return f"Note: no table has a column named `{col}`."
 
-def ask(db_id, question, evidence="", max_retries=0, rich_schema=False, column_hints=False):
+def ask(db_id, question, evidence="", max_retries=0, rich_schema=False, column_hints=False, validate=False):
     """Question -> SQL -> result. On an SQL error, retry up to max_retries times."""
     schema = describe_db(db_id) if rich_schema else get_schema(db_id)
     prompt = PROMPT.format(schema=schema, evidence=evidence or "none", question=question)
     sql = clean_sql(generate(prompt))
     for attempt in range(max_retries + 1):
+        if validate:
+            reason = validate_sql(sql)
+            if reason:
+                return {"sql": sql, "rows": None, "error": f"blocked: {reason}", "attempts": attempt + 1}
         try:
             return {"sql": sql, "rows": run_sql(db_id, sql), "error": None, "attempts": attempt + 1}
         except Exception as e:

@@ -68,3 +68,14 @@ def column_tables(db_id):
             for col in conn.execute(f'PRAGMA table_info("{t}")').fetchall():
                 index.setdefault(col[1].lower(), []).append(t)
     return index
+
+DATA = Path(__file__).resolve().parent.parent / "data" / "minidev" / "MINIDEV"
+DB_DIR = DATA / "dev_databases"   # the attack script points this at a sandbox copy
+
+
+def connect(db_id, read_only=False):
+    """Open the SQLite file for one database."""
+    path = DB_DIR / db_id / f"{db_id}.sqlite"
+    if read_only:
+        return sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    return sqlite3.connect(path, isolation_level=None)

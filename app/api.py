@@ -50,5 +50,7 @@ def schema(db_id: str):
 def ask_question(q: Question):
     check_db(q.db_id)
     out = ask(q.db_id, q.question, q.evidence, **SAFE_SETTINGS)
+    if out["error"] and out["error"].startswith("blocked"):
+        raise HTTPException(status_code=403, detail=out["error"])
     rows = out["rows"][:MAX_ROWS] if out["rows"] is not None else None
     return Answer(sql=out["sql"], rows=rows, error=out["error"])

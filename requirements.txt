@@ -1,0 +1,7 @@
+fastapi==0.162.5
+fastmcp==4.1.8
+httpx==0.28.1
+ollama==0.6.3
+pytest==9.2.0
+sqlglot==30.31.0
+uvicorn==0.54.0

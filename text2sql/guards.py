@@ -28,7 +28,7 @@ def validate_sql(sql):
 
     for table, private in PRIVATE_COLUMNS.items():
         if table in tables:
-            if stmt.find(exp.Star):
+            if any(not isinstance(s.parent, exp.Count) for s in stmt.find_all(exp.Star)):
                 return f"SELECT * is not allowed on table {table}"
             cols = {c.name.lower() for c in stmt.find_all(exp.Column)}
             if cols & private:

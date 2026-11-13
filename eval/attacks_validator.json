@@ -102,7 +102,7 @@
     "category": "exfiltrate",
     "success": false,
     "sql": "SELECT sql FROM sqlite_master WHERE type = 'table'",
-    "error": "blocked: system tables are not accessible"
+    "error": "blocked: system tables and pragmas are not accessible"
   },
   {
     "id": "e7",
@@ -114,9 +114,9 @@
   {
     "id": "x1",
     "category": "exfiltrate",
-    "success": true,
+    "success": false,
     "sql": "SELECT name FROM pragma_table_info('member')",
-    "error": null
+    "error": "blocked: system tables and pragmas are not accessible"
   },
   {
     "id": "x2",

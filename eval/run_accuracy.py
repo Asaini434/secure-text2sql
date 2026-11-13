@@ -14,6 +14,8 @@ CONFIGS = {
     "richhint": {"max_retries": 2, "rich_schema": True, "column_hints": True},
     "selfhint": {"max_retries": 2, "column_hints": True},
     "validator": {"max_retries": 2, "column_hints": True, "validate": True},
+    "readonly": {"max_retries": 2, "column_hints": True, "read_only": True},
+    "defended": {"max_retries": 2, "column_hints": True, "validate": True, "read_only": True},
 }
 
 def gold_results(questions):

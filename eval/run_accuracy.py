@@ -12,6 +12,7 @@ CONFIGS = {
     "selfcorrect": {"max_retries": 2},
     "richschema": {"max_retries": 2, "rich_schema": True},
     "richhint": {"max_retries": 2, "rich_schema": True, "column_hints": True},
+    "selfhint": {"max_retries": 2, "column_hints": True},
 }
 
 def gold_results(questions):
